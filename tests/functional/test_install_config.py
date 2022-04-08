@@ -353,25 +353,41 @@ def test_do_not_prompt_for_authentication(
     assert "ERROR: HTTP error 401" in result.stderr
 
 
-@pytest.fixture(params=(True, False), ids=("auth_needed", "auth_not_needed"))
+@pytest.fixture(params=(True, False))
 def auth_needed(request: pytest.FixtureRequest) -> bool:
     return request.param  # type: ignore[attr-defined]
 
 
 @pytest.fixture(
     params=(
-        False,
-        True,
+        (False, False, False),
+        (False, True, False),
+        (True, True, False),
+        (True, False, True),
     ),
-    ids=("default", "no_input"),
+    ids=(
+        "default-default",
+        "default-keyring_does_not_prompt",
+        "no_input-keyring_does_not_prompt",
+        "no_input-default",
+    ),
 )
-def flags(request: pytest.FixtureRequest) -> typing.List[str]:
-    no_input = request.param  # type: ignore[attr-defined]
+def flags(request: pytest.FixtureRequest, auth_needed: bool) -> typing.List[str]:
+    (
+        no_input,
+        keyring_does_not_prompt,
+        xfail,
+    ) = request.param  # type: ignore[attr-defined]
 
     flags = []
     if no_input:
         flags.append("--no-input")
-
+    if keyring_does_not_prompt:
+        flags.append(
+            "--keyring-does-not-prompt",
+        )
+    if auth_needed and xfail:
+        request.applymarker(pytest.mark.xfail())
     return flags
 
 
