@@ -1,0 +1,1 @@
+Add ``--keyring-does-not-prompt`` flag which allows ``keyring`` lookups in combination with ``--no-input``. See the Authentication page in the documentation for more info.

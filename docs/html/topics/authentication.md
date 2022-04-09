@@ -74,6 +74,25 @@ $ echo "your-password" | keyring set pypi.company.com your-username
 $ pip install your-package --index-url https://pypi.company.com/
 ```
 
+Pip does not query `keyring` for credentials when `--no-input` is used unless
+`--keyring-does-not-prompt` is used as well. `keyring` backends might not
+require any user interaction at all, they might prompt for more information on
+the console, or they could do things like trigger a security notification on a
+mobile device which needs to be approved. That is why Pip has to be
+conservative and users should be confident their configured backend requires no
+user input.
+Tools such as Pipx and Pipenv which either show a fancy progress indicator that
+hides output from the Pip subprocess, or pass `--no-input` to the Pip
+subprocess (or do both) are a situation where you will want to do some variant
+of the following since it does not require support from the tool:
+
+```bash
+# possibly with --user, --global or --site
+$ pip config set global.keyring-does-not-prompt true
+# or
+$ export PIP_KEYRING_DOES_NOT_PROMPT=1
+```
+
 Note that `keyring` (the Python package) needs to be installed separately from
 pip. This can create a bootstrapping issue if you need the credentials stored in
 the keyring to download and install keyring.
